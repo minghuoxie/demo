@@ -1,0 +1,14 @@
+-------application.yml
+application:
+    name: eureka-client
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8080/login
+
+ ------pom.xml
+ <dependency>
+             <groupId>org.springframework.boot</groupId>
+             <artifactId>spring-boot-starter-security</artifactId>
+         </dependency>

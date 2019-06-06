@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>添加demo</title>
+    <script src="http://libs.baidu.com/jquery/1.9.0/jquery.js"></script>
+    <style  type="text/css">
+        textarea{
+            width:800px;
+            height:300px;
+            display: block;
+        }
+    </style>
+    <script type="text/javascript">
+        $(function(){
+            $("#save").click(function(){
+                var test=$("textarea").val();
+                $.post("/add",{test:test},function(data){
+                    $("textarea").val("");
+                });
+            });
+        });
+    </script>
+</head>
+<body ng-app="app" ng-controller="MainController">
+
+<h2>添加demo </h2>
+<textarea>
+
+</textarea>
+<button type="button" id="save">保存</button>
+<button type="button"><a href="/demolist">列表</a></button>
+</body>
+</html>

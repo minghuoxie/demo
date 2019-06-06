@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>列表</title>
+    <script src="http://libs.baidu.com/jquery/1.9.0/jquery.js"></script>
+    <style  type="text/css">
+        #list{
+            width: 800px;
+            height: 400px;
+            list-style-type: none;
+            margin: 0 auto;
+            overflow: auto;
+        }
+        #list>li{
+            line-height:25px;
+            margin-top:10px;
+            border-bottom: #ff4cbb dashed 1px;
+        }
+    </style>
+    <script type="text/javascript">
+        $(function(){
+           $.get("/getAll",function(data){
+               var ul="";
+               $.each(data,function(i,item){
+                   ul+="<li>"+item.name+"</li>";
+                   // $.each(item,function(key,val){
+                   //
+                   // });
+               });
+               $("#list").html(ul);
+           });
+        });
+    </script>
+</head>
+<body ng-app="app" ng-controller="MainController">
+
+<h2>列表页 </h2>
+<button type="button"><a href="/addemo">添加</a></button>
+<ul id="list">
+</ul>
+</body>
+</html>
