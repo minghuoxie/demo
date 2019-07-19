@@ -36,7 +36,7 @@ public class DemoWebApplicationTests {
 
     @Test
     public void contextLoads() {
-
+        System.out.println("----------------hahaha");
     }
     @Test
     public void testPush(){
@@ -122,4 +122,38 @@ public class DemoWebApplicationTests {
         });
         System.out.println("--End");
     }
+
+
+    //测试，爬取贴吧内容
+    @Test
+    public void testHuiShuiTieBa(){
+        WebClient client=new WebClient(BrowserVersion.CHROME);//新建模拟谷歌Chrome浏览器的浏览器客户端对象
+
+        client.getOptions().setThrowExceptionOnScriptError(false);//当执行js出错的时候是否抛出异常
+        client.getOptions().setThrowExceptionOnFailingStatusCode(false);//当HTTP的状态非200时是否抛出异常, 这里选择不需要
+        client.getOptions().setActiveXNative(false);
+        client.getOptions().setCssEnabled(false);//是否启用CSS
+        client.getOptions().setJavaScriptEnabled(true);//是否启用js
+        client.setAjaxController(new NicelyResynchronizingAjaxController()); //设置支持AJAX
+
+        HtmlPage page=null;
+        try{
+            page=client.getPage("http://tieba.baidu.com/f?kw=%BB%DD%CB%AE&tpl=5");//加载网页
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        //http://tb1.bdstatic.com/??/tb/_/static-search/widget/suggestion/suggestion.js
+        //http://tb1.bdstatic.com/??/tb/_/frs-aside/search_back_09a1101.js
+        //http://tb1.bdstatic.com/??/tb/_/http_transform_d9b1cbd.js,/tb/_/suggestion_d2ee788.js,/tb/_/search_handler_7e7697d.js,/tb/_/search_dialog_b4dc63b.js,/tb/_/search_logic_13e7c51.js
+        client.close();
+        client.waitForBackgroundJavaScript(3000);
+
+        String pageXml=page.asXml();//直接将加载玩成的xml转换位字符串
+        Document doc= Jsoup.parse(pageXml);
+        Element body=doc.body();
+        Element ulId=body.getElementById("thread_list");
+        System.out.println(pageXml);
+        System.out.println("--end"+ulId);
+    }
+
 }
