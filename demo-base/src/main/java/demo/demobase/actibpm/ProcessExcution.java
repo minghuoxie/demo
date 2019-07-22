@@ -13,7 +13,7 @@ public class ProcessExcution {
         Deployment deployment=processEngine.getRepositoryService() //与流程定义和部署对象相关的service
                 .createDeployment() //创建一个部署对象
                 .name("hwllowordbus") //部署的名称
-                .addClasspathResource("bpms/helloword.bpmn")
+                .addClasspathResource("bpms/helloword.xml")
                 .addClasspathResource("bpms/helloword.png")
                 .deploy();
 

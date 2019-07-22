@@ -4,10 +4,13 @@ import org.activiti.engine.ProcessEngine;
 import org.activiti.engine.ProcessEngines;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.TaskService;
+import org.activiti.engine.history.HistoricIdentityLink;
 import org.activiti.engine.history.HistoricTaskInstance;
 import org.activiti.engine.repository.Deployment;
 import org.activiti.engine.repository.ProcessDefinition;
+import org.activiti.engine.runtime.Execution;
 import org.activiti.engine.runtime.ProcessInstance;
+import org.activiti.engine.task.IdentityLink;
 import org.activiti.engine.task.Task;
 import org.apache.commons.io.FileUtils;
 
@@ -18,18 +21,32 @@ import java.util.zip.ZipInputStream;
 public class DemoHelloWord {
     ProcessEngine processEngine= ProcessEngines.getDefaultProcessEngine();
 
-    //部署流程定义
-    public void deploymentProcessDefinition(){
-       Deployment deployment=processEngine.getRepositoryService() //与流程定义和部署对象相关的service
-                .createDeployment() //创建一个部署对象
-                .name("hwllowordbus") //部署的名称
-                .addClasspathResource("bpms/flow.bpmn")
-                .addClasspathResource("bpms/flow.png")
-                .deploy();
-
-       System.out.println("-------------id:"+deployment.getId()); //部署ID
-       System.out.println("-----------name:"+deployment.getName()); //部署名称
+    //act_ru_identitylink查询
+    public void test_act_ru_identitylink(){
+        List<IdentityLink> list= processEngine.getTaskService()
+                .getIdentityLinksForTask("taskId");
     }
+
+    //act_hi_identitylink
+    public void test_act_hi_identitylink(){
+        List<HistoricIdentityLink> list=processEngine.getHistoryService()
+                .getHistoricIdentityLinksForTask("taskId");
+    }
+
+    //将组任务分配给个人任务，指定任务的办理人字段
+    public void test_claim(){
+        processEngine.getTaskService()
+                .claim("taskID","userID");
+
+    }
+
+    //将个人任务回退到组任务，前提，之前一定式组任务
+    public void test_setAssigee(){
+        processEngine.getTaskService()
+                    .setAssignee("taskID",null);
+    }
+
+
 
     //部署流程定义
     public void deploymentProcessDefinition_zip() {
@@ -78,19 +95,11 @@ public class DemoHelloWord {
 
 
 
-    //启动流程实列
-    public void startProcessInstance(){
-        //流程定义的key   act_re_procdef中的KEY_   .bpmn中的<process id="key">   helloword
-        String processDifinitionKey="helloword";
-        ProcessInstance pi=processEngine.getRuntimeService() //与正在执行的流程实列和执行对象相关的Service
-                        .startProcessInstanceByKey(processDifinitionKey);//默认执行最新版本的key
-        System.out.println("--------------id:"+pi.getId());  //流程实列ID
-        System.out.println("--------流程定义ID:"+pi.getProcessDefinitionId()); //流程定义ID
-    }
+
 
     //查询当前人的个人任务
     public void findMyPersonalTask(){
-        String assignee="李四";
+        String assignee="shenbao";
        List<Task> list= processEngine.getTaskService() //与正在执行的任务管理相关的service
                         .createTaskQuery() //创建任务查询对象
                         .taskAssignee(assignee) //指定个人任务查询 ，指定办理人
@@ -109,10 +118,7 @@ public class DemoHelloWord {
        }
     }
 
-    public void completeTask(){
-        String taskID="104";
-        processEngine.getTaskService().complete(taskID);
-    }
+
 
     /**删除流程定义*/
     public void deleteProcessDefinition(){
@@ -179,6 +185,9 @@ public class DemoHelloWord {
 
     }
 
+
+
+
     /**查询流程状态(判断流程是不是结束)*/
     public void isProcessEnd(){
         String processInstanceId="201";
@@ -237,11 +246,133 @@ public class DemoHelloWord {
         // taskService.getVariables("taskId",Collection<O>)  根据任务ID和变量名称集合获取
 
     }
-    public static void main(String[] args){
-        DemoHelloWord demoHelloWord=new DemoHelloWord();
-        demoHelloWord.deploymentProcessDefinition();
+
+
+
+    //部署+启动+判断流程是否接受+历史查询
+    public void deploymentProcessAndstartProcessInstance(){
+        Deployment deployment=processEngine.getRepositoryService() //与流程定义和部署对象相关的service
+                .createDeployment() //创建一个部署对象
+                .name("palleway") //部署的名称
+                .addClasspathResource("bpms/palleway.bpmn")
+                .addClasspathResource("bpms/palleway.png")
+                .deploy();
+
+       ProcessDefinition definition=processEngine.getRepositoryService()
+                .createProcessDefinitionQuery()
+                .deploymentId(deployment.getId())
+                .singleResult();
+        //流程定义的key   act_re_procdef中的KEY_   .bpmn中的<process id="key">   helloword
+        String processDifinitionKey=definition.getKey();
+        ProcessInstance pi=processEngine.getRuntimeService() //与正在执行的流程实列和执行对象相关的Service
+                .startProcessInstanceByKey(processDifinitionKey);
+
+        ProcessInstance excutionProcess= processEngine.getRuntimeService()
+                .createProcessInstanceQuery()
+                .processInstanceId(pi.getProcessInstanceId())
+                .singleResult();
+        if(excutionProcess==null){
+            System.out.println("------------流程结束");
+        }else{
+            System.out.println("--------------流程实列ID:"+excutionProcess.getProcessInstanceId());  //流程实列ID
+            System.out.println("--------执行对象ID:"+excutionProcess.getId()); //流程定义ID
+        }
+
     }
 
+    //分配代理人(替换代理人)
+    public void aginSetAssignee(){
+        processEngine.getTaskService().setAssignee("taskId","newPeoper");
+    }
+
+    //接收任务
+    public void test_ReciveTask(){
+        //启动实列
+        String processDifinitionKey="recivetaskkey";
+        ProcessInstance pi=processEngine.getRuntimeService() //与正在执行的流程实列和执行对象相关的Service
+                .startProcessInstanceByKey(processDifinitionKey);
+        //获取执行对象
+        Execution excution=processEngine.getRuntimeService()
+                    .createExecutionQuery()
+                    .processInstanceId(pi.getId())
+                    .activityId("receivetask1")
+                    .singleResult();
+
+        //使用流程变量用来传递业务
+        processEngine.getRuntimeService()
+                    .setVariable(excution.getId(),"huizongribao",1000);
+        //向后执行一步，如果流程处于等待状态，使得流程继续执行
+        processEngine.getRuntimeService()
+                .signal(excution.getId());
+
+        //获取执行对象
+        Execution excution2=processEngine.getRuntimeService()
+                .createExecutionQuery()
+                .processInstanceId(pi.getId())
+                .activityId("receivetask2")
+                .singleResult();
+
+        Integer val=(Integer)processEngine.getRuntimeService()
+                    .getVariable(excution2.getId(),"huizongribao");
+
+        System.out.println("-----------value:"+val);
+
+        processEngine.getRuntimeService().signal(excution2.getId());
+    }
+    public static void main(String[] args){
+        DemoHelloWord demoHelloWord=new DemoHelloWord();
+        demoHelloWord.startProcessInstance();
+        //demoHelloWord.findMyPersonalTask();//查看当前任务
+
+      // demoHelloWord.completeTask();  //完成任务
+
+    }
+    //部署流程定义
+    public void deploymentProcessDefinition(){
+        Deployment deployment=processEngine.getRepositoryService() //与流程定义和部署对象相关的service
+                .createDeployment() //创建一个部署对象
+                .name("taskmany") //部署的名称
+                .addClasspathResource("bpmtask/taskmany.bpmn")
+                .addClasspathResource("bpmtask/taskmany.png")
+                .deploy();
+
+        System.out.println("-------------id:"+deployment.getId()); //部署ID
+        System.out.println("-----------name:"+deployment.getName()); //部署名称
+    }
+
+    //启动流程实列
+    public void startProcessInstance(){
+        //流程定义的key   act_re_procdef中的KEY_   .bpmn中的<process id="key">   helloword
+        String processDifinitionKey="taskmanykey";
+        ProcessInstance pi=processEngine.getRuntimeService() //与正在执行的流程实列和执行对象相关的Service
+                .startProcessInstanceByKey(processDifinitionKey);//默认执行最新版本的key
+        System.out.println("--------------id:"+pi.getId());  //流程实列ID
+        System.out.println("--------流程定义ID:"+pi.getProcessDefinitionId()); //流程定义ID
+    }
+
+
+
+
+    /**完成任务：使用流程变量来控制分支：${message=='不重要'}*/
+    public void completeTask(String taskID){
+//        String taskID="1304";
+//        Map<String,Object> avariable=new HashMap<>();
+//        avariable.put("message","重要");
+//        processEngine.getTaskService().complete(taskID,avariable);
+//        //  processEngine.getTaskService().complete(taskID);
+
+//        String taskID="2107";
+//        Map<String,Object> avariable=new HashMap<>();
+//        avariable.put("money",600);
+//        processEngine.getTaskService().complete(taskID,avariable);
+//        //  processEngine.getTaskService().complete(taskID);
+        processEngine.getTaskService().complete(taskID);
+        //  processEngine.getTaskService().complete(taskID);
+
+        System.out.println("---------------完成任务----------------------");
+        //设置新的代理人
+        //processEngine.getTaskService().setAssignee("taskId","newPeoper");
+    }
 
     /**历史表：汇总*/
     public void findHitory(){
@@ -277,6 +408,14 @@ public class DemoHelloWord {
      * act_ru_variable  正职执行的流程变量  EXECUTION_ID_(执行对象ID)  PROC_INST_ID_(流程实例ID)  TASK_ID_(任务ID)
      * act_hi_varinst   流程变量 历史   EXECUTION_ID_(执行对象ID)  PROC_INST_ID_(流程实例ID)  TASK_ID_(任务ID)
      *
+     *
+     * act_ru_identitylink  任务办理人表(个人任务，组任务)
+     * act_hi_identitylink   任务办理人历史表
+     *
+     *
+     * 4.
+     * 动态分配代理人  在Assignee  #{uid}
+     * 在启动流程的时候使用流程变量动态绑定 map.put("uid","who")
      *
      *
      * */
