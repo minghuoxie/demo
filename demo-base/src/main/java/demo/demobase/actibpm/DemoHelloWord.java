@@ -1,5 +1,6 @@
 package demo.demobase.actibpm;
 
+import demo.demobase.actibpm.testxiangmu.TestXiangMuh;
 import org.activiti.engine.ProcessEngine;
 import org.activiti.engine.ProcessEngines;
 import org.activiti.engine.RuntimeService;
@@ -319,14 +320,6 @@ public class DemoHelloWord {
 
         processEngine.getRuntimeService().signal(excution2.getId());
     }
-    public static void main(String[] args){
-        DemoHelloWord demoHelloWord=new DemoHelloWord();
-        demoHelloWord.startProcessInstance();
-        //demoHelloWord.findMyPersonalTask();//查看当前任务
-
-      // demoHelloWord.completeTask();  //完成任务
-
-    }
     //部署流程定义
     public void deploymentProcessDefinition(){
         Deployment deployment=processEngine.getRepositoryService() //与流程定义和部署对象相关的service
@@ -381,7 +374,6 @@ public class DemoHelloWord {
         processEngine.getHistoryService().createHistoricActivityInstanceQuery();//历史活动
         processEngine.getHistoryService().createHistoricVariableInstanceQuery();//历史流程变量
     }
-
     /**
      * 1.和流程定义相关的表：
      * act_re_deployment  部署对象和流程定义相关的表     Deployment deployment=processEngine.getRepositoryService()
@@ -416,6 +408,16 @@ public class DemoHelloWord {
      * 4.
      * 动态分配代理人  在Assignee  #{uid}
      * 在启动流程的时候使用流程变量动态绑定 map.put("uid","who")
+     *
+     *
+     *
+     * 1.任务组并不是全部的人都审核才能，，，只需要完成任务就会到下一个模块。
+     *
+     *
+     *
+     *
+     * https://blog.csdn.net/zhangdaiscott/article/details/80944389   工作流监听事件
+     *
      *
      *
      * */

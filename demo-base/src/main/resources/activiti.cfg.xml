@@ -7,7 +7,7 @@ http://www.springframework.org/schema/tx http://www.springframework.org/schema/t
 
 	<bean id="processEngineConfiguration" class="org.activiti.engine.impl.cfg.StandaloneProcessEngineConfiguration">
 		<property name="jdbcDriver" value="com.mysql.jdbc.Driver"></property>
-		<property name="jdbcUrl" value="jdbc:mysql://localhost:3306/study?useUnicode=true&amp;characterEncoding=utf8"></property>
+		<property name="jdbcUrl" value="jdbc:mysql://localhost:3306/testgms?useUnicode=true&amp;characterEncoding=utf8"></property>
 		<property name="jdbcUsername" value="root"></property>
 		<property name="jdbcPassword" value="root"></property>
 
