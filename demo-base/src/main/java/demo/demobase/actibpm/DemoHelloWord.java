@@ -7,6 +7,7 @@ import org.activiti.engine.RuntimeService;
 import org.activiti.engine.TaskService;
 import org.activiti.engine.history.HistoricIdentityLink;
 import org.activiti.engine.history.HistoricTaskInstance;
+import org.activiti.engine.impl.persistence.entity.ProcessDefinitionEntity;
 import org.activiti.engine.repository.Deployment;
 import org.activiti.engine.repository.ProcessDefinition;
 import org.activiti.engine.runtime.Execution;
@@ -21,6 +22,29 @@ import java.util.zip.ZipInputStream;
 
 public class DemoHelloWord {
     ProcessEngine processEngine= ProcessEngines.getDefaultProcessEngine();
+
+    public static void main(String[] args){
+        DemoHelloWord demoHelloWord=new DemoHelloWord();
+        demoHelloWord.getMapByTaskId("1005");
+    }
+    //根据任务ID获取坐标
+    public void getMapByTaskId(String taskId){
+        //根据任务ID获取任务对象
+        Task task=processEngine.getTaskService()
+                .createTaskQuery()
+                .taskId(taskId)
+                .singleResult();
+        //获取流程定义的ID
+        String processDefinitionId=task.getProcessDefinitionId();
+        //获取流程定义的实体对象(对应.bpmn中的数据)
+       ProcessDefinitionEntity processDefinitionEntity= (ProcessDefinitionEntity)processEngine.getRepositoryService()
+                .getProcessDefinition(processDefinitionId);
+
+       //获取数据
+
+        System.out.println("-------------------");
+
+    }
 
     //act_ru_identitylink查询
     public void test_act_ru_identitylink(){
@@ -367,6 +391,30 @@ public class DemoHelloWord {
         //processEngine.getTaskService().setAssignee("taskId","newPeoper");
     }
 
+
+
+    //读取clob文件
+    public void readClob(){
+        //processEngine.getHistoryService()//
+//        public static void bpmnMethod() throws XMLStreamException, IOException {
+//            File file = new File("E:/新建2.xml");
+//            InputStream inputStream = new FileInputStream(file);//实例化FileInputStream
+//            // InputStream inputStream = repositoryService.getResourceAsStream( processitionDefinition.getId(),sourceName);
+//            //创建转换对象
+//            BpmnXMLConverter converter = new BpmnXMLConverter();
+//            XMLInputFactory factory = XMLInputFactory.newInstance();
+//            XMLStreamReader reader = factory.createXMLStreamReader(inputStream);//createXmlStreamReader
+//            //将xml文件转换成BpmnModel
+//            BpmnModel bpmnModel = converter.convertToBpmnModel(reader);
+//            System.out.println();
+//        }
+//        ---------------------
+//                作者：青年小篆
+//        来源：CSDN
+//        原文：https://blog.csdn.net/u010176014/article/details/80880743
+//        版权声明：本文为博主原创文章，转载请附上博文链接！
+    }
+
     /**历史表：汇总*/
     public void findHitory(){
         processEngine.getHistoryService().createHistoricProcessInstanceQuery();//历史流程
@@ -421,4 +469,7 @@ public class DemoHelloWord {
      *
      *
      * */
+
+
+
 }

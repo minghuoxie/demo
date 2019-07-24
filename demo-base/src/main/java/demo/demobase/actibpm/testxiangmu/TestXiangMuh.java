@@ -101,13 +101,13 @@ public class TestXiangMuh {
         // 2.用户登陆
         demoHelloWord.userLogin("李四");
         //3.启动流程  创建请假申请
-        //demoHelloWord.startProcess("今天脚又歪倒了，请假");
+        demoHelloWord.startProcess("今天脚又歪倒了，请假");
      //   demoHelloWord.startProcess();
 
         //4.提交申请  完成任务  选择对应的审批老师
         demoHelloWord.findTask();
         //yes no
-       demoHelloWord.completeTask("505","yes");
+       //demoHelloWord.completeTask("505","yes");
         //  testXiangMuh.deploymentProcessDefinition();
     }
 }
